@@ -13,6 +13,16 @@ import matplotlib.pyplot as plt
 from textblob import TextBlob
 import logging
 
+# import nltk
+# from nltk.tokenize import word_tokenize
+# from nltk.stem import WordNetLemmatizer
+# from nltk.corpus import stopwords
+# nltk.download('stopwords')
+# nltk.download('wordnet')
+# nltk.download('punkt')
+# nltk.download('vader_lexicon')
+# from textblob import TextBlob
+
 import warnings
 warnings.filterwarnings("ignore")
 load_dotenv()
@@ -20,33 +30,31 @@ load_dotenv()
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 
-def process_text(text):
+# def process_text(text):
     
-    # Initialise
-    lemmatizer = WordNetLemmatizer()
-    processed_text = " "
+#     # Initialise
+#     lemmatizer = WordNetLemmatizer()
+#     processed_text = " "
     
-    # Process input
-    text_lower = text.lower()
-    word = word_tokenize(text_lower)
+#     # Process input
+#     text_lower = text.lower()
+#     word = word_tokenize(text_lower)
     
-    # Alphabetical Tokens
-    alphabetic_tokens = [word for word in word if re.match('^[a-zA-Z]+$', word)]
+#     # Alphabetical Tokens
+#     alphabetic_tokens = [word for word in word if re.match('^[a-zA-Z]+$', word)]
     
-    # Remove stopwords from text and lemmatize
-    stop_words = set(stopwords.words('english'))
+#     # Remove stopwords from text and lemmatize
+#     stop_words = set(stopwords.words('english'))
+    
+#     lem_words = []
+#     for word in alphabetic_tokens:
+#         if word not in stop_words:
+#             lem_words.append(lemmatizer.lemmatize(word))
+    
+#     # Join the list of words
+#     processed_text = processed_text.join(lem_words)     #print(edited_stop_words)
 
-    
-    
-    lem_words = []
-    for word in alphabetic_tokens:
-        if word not in stop_words:
-            lem_words.append(lemmatizer.lemmatize(word))
-    
-    # Join the list of words
-    processed_text = processed_text.join(lem_words)     #print(edited_stop_words)
-
-    return processed_text
+    # return processed_text
 
 def clean_text(text):
     cleaned_text = ''.join([char.lower() for char in text if char.isalpha() or char.isspace()])
