@@ -8,6 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from sqlalchemy import create_engine
 import time
 import csv
 import random
@@ -82,7 +83,7 @@ with DAG(
             print("No more reviews found or a loading issue occurred.")
             return False
         column_names = ["review_title", "review_text", "review_date"]
-        reviews_df = pd.DataFrame(column_names = column_names)
+        review_df = pd.DataFrame(column_names = column_names)
         for review in review_containers:
             try:
                 epsilon = random.randint(1, 10)
@@ -97,12 +98,17 @@ with DAG(
                 review_df.loc[len(review_df.index)] = [review_title, review_text, review_date]
             except Exception as e:
                 print(f"Error extracting review: {e}")       
+        #Retrieve the date of the last extracted data in database
+        curr_period = get_curr_period()
         
+        #Filter to only get data with date past the last extracted data in database 
+        df = df[df["review_date"] > curr_period]
+
         engine = get_engine()
         connection_name = engine.connect()
 
         #Check the current name of the table in the database
-        review_df.to_sql(name="review_data", con=connection_name, if_exists='replace', index=False)
+        review_df.to_sql(name="reviews", con=connection_name, if_exists='append', index=False)
         connection_name.commit()
 
         return True
@@ -110,8 +116,15 @@ with DAG(
         # Static user agents to avoid web crawling detection on the website
         base_url = "https://www.tripadvisor.com.sg/Hotel_Review-g294265-d1770798-Reviews"
         offset_pattern = "-or{}-Marina_Bay_Sands-Singapore.html"
-        page_url = f"{base_url}{offset_pattern.format(offset)}"
+        page_url = f"{base_url}{offset_pattern.format(offset_pattern)}"
         return page_url
+    
+    def get_curr_period():
+        engine = get_engine()
+        str_sql = '''SELECT `Review Date` from reviews ORDER BY `Review Date` DESC LIMIT 1'''
+        with engine.connect() as connection:
+            result = connection.execute(str_sql)
+        return result[0]
     
     def get_engine():
         engine = create_engine("mysql+pymysql://admin:bt4301db1@bt4301-db1.cxmwooi4whw1.ap-southeast-1.rds.amazonaws.com:3306/BT4301_G09_Database")
