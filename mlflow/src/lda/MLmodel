@@ -1,0 +1,21 @@
+flavors:
+  python_function:
+    cloudpickle_version: 3.0.0
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.9.16
+mlflow_version: 2.11.3
+model_size_bytes: 11915529
+model_uuid: 3311dc9de78e4b34b5092d3c951a9b68
+saved_input_example_info:
+  artifact_path: input_example.json
+  format: tf-serving
+  type: ndarray
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "object", "shape": [-1]}}]'
+  outputs: '[{"type": "string", "required": true}]'
+  params: null
+utc_time_created: '2024-04-14 17:09:58.754489'
