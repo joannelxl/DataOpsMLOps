@@ -12,16 +12,16 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from textblob import TextBlob
 import logging
-
-# import nltk
-# from nltk.tokenize import word_tokenize
-# from nltk.stem import WordNetLemmatizer
-# from nltk.corpus import stopwords
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
 # nltk.download('stopwords')
 # nltk.download('wordnet')
 # nltk.download('punkt')
 # nltk.download('vader_lexicon')
-# from textblob import TextBlob
+from textblob import TextBlob
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -30,35 +30,61 @@ load_dotenv()
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 
-# def process_text(text):
+def process_text(text):
+    # Initialise
+    lemmatizer = WordNetLemmatizer()
+    processed_text = " "
     
-#     # Initialise
-#     lemmatizer = WordNetLemmatizer()
-#     processed_text = " "
+    # Process input
+    text_lower = text.lower()
+    word = word_tokenize(text_lower)
     
-#     # Process input
-#     text_lower = text.lower()
-#     word = word_tokenize(text_lower)
+    # Alphabetical Tokens
+    alphabetic_tokens = [word for word in word if re.match('^[a-zA-Z]+$', word)]
     
-#     # Alphabetical Tokens
-#     alphabetic_tokens = [word for word in word if re.match('^[a-zA-Z]+$', word)]
+    # Remove stopwords from text and lemmatize
+    stop_words = set(stopwords.words('english'))
     
-#     # Remove stopwords from text and lemmatize
-#     stop_words = set(stopwords.words('english'))
+    lem_words = []
+    for word in alphabetic_tokens:
+        if word not in stop_words:
+            lem_words.append(lemmatizer.lemmatize(word))
     
-#     lem_words = []
-#     for word in alphabetic_tokens:
-#         if word not in stop_words:
-#             lem_words.append(lemmatizer.lemmatize(word))
-    
-#     # Join the list of words
-#     processed_text = processed_text.join(lem_words)     #print(edited_stop_words)
+    # Join the list of words
+    processed_text = processed_text.join(lem_words)     #print(edited_stop_words)
 
-    # return processed_text
+    return processed_text
 
 def clean_text(text):
     cleaned_text = ''.join([char.lower() for char in text if char.isalpha() or char.isspace()])
     return cleaned_text
+
+def scale_reviews(value):
+    # Calculate the scaled value using linear scaling
+    scaled_value = ((value - 1) / (5 - 1)) * (1 - (-1)) + (-1)
+    return scaled_value
+
+def weighed_title_score(row):
+    analyzer = SentimentIntensityAnalyzer()
+    vader = analyzer.polarity_scores(row['CleanReviewTitle'])['compound']
+    textblob = TextBlob(row['CleanReviewTitle']).sentiment.polarity
+    rating = scale_reviews(row["Rating"])
+    avg = (vader + textblob + rating) / 3
+    return avg
+
+def weighed_text_score(row):
+    analyzer = SentimentIntensityAnalyzer()
+    vader = analyzer.polarity_scores(row['CleanReviewText'])['compound']
+    textblob = TextBlob(row['CleanReviewText']).sentiment.polarity
+    rating = scale_reviews(row["Rating"])
+    avg = (vader + textblob + rating) / 3
+    return avg
+
+def threshold(value):
+    if value < 0:
+        return 0
+    else:
+        return 1
 
 def set_overall_id(**kwargs):
     # create connection
@@ -169,12 +195,15 @@ def etl_review_dimension(**kwargs):
     cols = review_df.columns.to_list()
     cols = cols[-1:] + cols[:-1]
     review_df = review_df[cols]
-    # data cleaning to make the review rating and reviewer contribution an integer
+
     review_df['Rating'] = review_df['Rating'].astype(int)
-    review_df['CleanReviewTitle'] = review_df['ReviewTitle'].apply(clean_text)
-    review_df['CleanReviewText'] = review_df['ReviewText'].apply(clean_text)
-    review_df['TextBlob_Title'] = review_df['CleanReviewTitle'].apply(lambda x: TextBlob(x).sentiment.polarity)
-    review_df['TextBlob_Review'] = review_df['CleanReviewText'].apply(lambda x: TextBlob(x).sentiment.polarity)
+    review_df['CleanReviewTitle'] = review_df['ReviewTitle'].apply(process_text)
+    review_df['CleanReviewText'] = review_df['ReviewText'].apply(process_text)
+    review_df['WeightedTitleScore'] = review_df.apply(weighed_title_score, axis = 1)
+    review_df['WeightedTextScore'] = review_df.apply(weighed_text_score, axis = 1)
+    review_df["Text_Sentiment"] = review_df['WeightedTextScore'].apply(threshold)
+    review_df["Title_Sentiment"] = review_df['WeightedTitleScore'].apply(threshold)
+
     logging.info(review_df)
 
     review_df.to_sql(name='review', con = db_datawarehouse, if_exists='append')
@@ -266,7 +295,7 @@ def etl_fact(**kwargs):
 
     # Load Fact Table in dwh
     fact_sql = f'''
-    SELECT review.OverallID, review.ReviewID, time.TimeID, review.TextBlob_Title, review.TextBlob_Review
+    SELECT review.OverallID, review.ReviewID, time.TimeID, review.Title_Sentiment, review.Text_Sentiment
     FROM review
     INNER JOIN time ON review.OverallID = time.OverallID
     WHERE review.OverallID > {count}
