@@ -196,12 +196,11 @@ def etl_review_dimension(**kwargs):
     cols = cols[-1:] + cols[:-1]
     review_df = review_df[cols]
 
-
     review_df['Rating'] = review_df['Rating'].astype(int)
     review_df['CleanReviewTitle'] = review_df['ReviewTitle'].apply(process_text)
     review_df['CleanReviewText'] = review_df['ReviewText'].apply(process_text)
     review_df['WeightedTitleScore'] = review_df.apply(weighed_title_score, axis = 1)
-    review_df['WeightedTextScore'] = review_df.apply(weighed_text_score)
+    review_df['WeightedTextScore'] = review_df.apply(weighed_text_score, axis = 1)
     review_df["Text_Sentiment"] = review_df['WeightedTextScore'].apply(threshold)
     review_df["Title_Sentiment"] = review_df['WeightedTitleScore'].apply(threshold)
 
