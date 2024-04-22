@@ -13,6 +13,10 @@ ENV/
 env.bak/
 venv.bak/
 
+# DB info
+*.yml
+.streamlit
+
 #
 Test.csv
 .DS_Store
