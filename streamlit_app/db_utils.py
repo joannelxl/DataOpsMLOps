@@ -29,20 +29,20 @@ def get_data():
         engine = create_engine(f'mysql+pymysql://{dwh_user}:{dwh_pw}@{dwh_host}:{dwh_port}/{dwh_name}', echo=False)
         review_sql = '''
         SELECT * 
-        FROM review'''
-        review_df = pd.read_sql(review_sql, engine)
+        FROM review;'''
+        review_df = pd.read_sql(review_sql, engine.raw_connection())
 
         time_sql = '''
         SELECT * 
-        FROM time'''
+        FROM time;'''
 
-        time_df = pd.read_sql(time_sql, engine)
+        time_df = pd.read_sql(time_sql, engine.raw_connection())
 
         fact_sql = '''
         SELECT * 
-        FROM fact'''
+        FROM fact;'''
 
-        fact_df = pd.read_sql(fact_sql, engine)
+        fact_df = pd.read_sql(fact_sql, engine.raw_connection())
 
         join_sql = '''
         SELECT  fact.Text_Sentiment, fact.Title_Sentiment, time.OverallID, time.StayDate, time.StayDateYear, time.StayDateMonth, time.StayDateDayOfWeek, time.StayDateDay, time.StayDateWeek,
@@ -50,12 +50,13 @@ def get_data():
         FROM fact
         INNER JOIN review ON fact.OverallID = review.OverallID
         INNER JOIN time ON time.OverallID = fact.OverallID
-        ORDER BY time.OverallID
+        ORDER BY time.OverallID;
         '''
 
 
-        complete_df = pd.read_sql(join_sql, engine)
-    except:
+        complete_df = pd.read_sql(join_sql, engine.raw_connection())
+    except Exception as e:
+        st.write(e)
         st.error("Unable to connect to DB, please check error logs")
     return complete_df
 
