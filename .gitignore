@@ -20,3 +20,4 @@ venv.bak/
 #
 Test.csv
 .DS_Store
+sentiment.pt
