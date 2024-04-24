@@ -19,6 +19,7 @@ from streamlit import components
 from datetime import datetime
 import pyLDAvis
 import pyLDAvis.gensim_models
+import re
 
 # Set basic configurations for the Streamlit page
 st.set_page_config(
@@ -61,9 +62,25 @@ def topic_modelling(df):
                     alpha='auto',
                     per_word_topics=True)
     
+    # Code referenced from https://stackoverflow.com/questions/46536132/how-to-access-topic-words-only-in-gensim
+    print(lda_model.show_topics())
+    lda_topics = lda_model.show_topics()
+    words = {}
+    for topic, word in lda_topics:
+        words[topic] = re.sub('[^A-Za-z ]+', '', word)
+    # End of code reference
     vis = pyLDAvis.gensim_models.prepare(lda_model, corpus, dictionary)
+
+    # Get topic mapping
+    updated_mapping = {}
+    for i in vis.topic_coordinates.topics.index:
+        print(i)
+        print(i%5)
+        print(words[i])
+        updated_mapping[vis.topic_coordinates.topics[i]] = words[i]
+    print(updated_mapping)
     html_string = pyLDAvis.prepared_data_to_html(vis)
-    return html_string
+    return (html_string, updated_mapping)
 
 #Customer Sentiment Analysis Page
 if selected_label == "Customer Sentiment Analysis":
@@ -73,49 +90,14 @@ if selected_label == "Customer Sentiment Analysis":
     min_date = df['StayDate'].min()
     max_date = df['StayDate'].max()
     date_range = st.date_input("Pick the period you want to analyse", (min_date, max_date),  max_value = max_date, min_value = min_date, format="DD/MM/YYYY", key="sentiment")
-    
-    # # Create a date range slider
-    # min_date = min_date.to_pydatetime()
-    # max_date = max_date.to_pydatetime()
-    # st.write(min_date)
-    # selected_dates = st.slider("Select Date Range", min_value=min_date, max_value=max_date, value=(min_date, max_date))
-
-    # this is filter by year only
-    # year_list = list(df.StayDateYear.unique())[::-1]
-    # selected_year = st.selectbox('Select a year', year_list, index=len(year_list)-1)
-    # df_selected_year = df[df.StayDateYear == selected_year]
-    # df_selected_year_sorted = df_selected_year.sort_values(by="Rating", ascending=False)
-
-
-    #co11, col2 = st.columns([2,3])
-
-    # either filter by year or filter by range of dates
-
-    #filter by year
-    # filter_year = (df["StayDateYear"] == selected_year)
-    # filtered_df_by_year = df[filter_year]
 
     # filter by range of dates
     earliest_date = pd.to_datetime(date_range[0])
     latest_date = max_date if len(date_range) == 1 else pd.to_datetime(date_range[1]) # ensure that there will always be a valid end date
 
-    # filtered_df_by_year = df[(df['StayDate'] >= earliest_date) & (df['StayDate'] <= latest_date)]
     filtered_df_by_year = df[(df['StayDate'] >= earliest_date) & (df['StayDate'] <= latest_date)]
-    # st.write(filtered_df_by_year)
-
-    #with co11:
-    #st.write("""
-            ### Bar Chart of Customer's Reviews""")
-    # fig, ax = plt.subplots()
 
     rating_counts = filtered_df_by_year['Rating'].value_counts().sort_index()
-    
-    # ax.bar(counts.index, counts.values)
-    # ax.set_xlabel('Ratings')
-    # ax.set_ylabel('Count')
-    # ax.set_xticks(range(1, 6))
-    # ax.set_xticklabels(range(1, 6))
-    # st.pyplot(fig)
 
     if not rating_counts.empty:
         fig1 = px.bar(x = rating_counts.index, y = rating_counts.values, 
@@ -123,24 +105,12 @@ if selected_label == "Customer Sentiment Analysis":
         st.plotly_chart(fig1)
     else:
         st.markdown("<h2 style='text-align: center;'>No data available for the selected period.</h2>", unsafe_allow_html=True)
-        # st.write("No data available.")
 
-    #with col2: 
-    # st.write("""
-    #     ### Pie Chart of Positive and Negative Review Sentiments
-    #             """)
-    # fig, ax = plt.subplots()
-    # filtered_df_by_year['Text_Sentiment'] = filtered_df_by_year['Text_Sentiment'].map({0: 'Negative', 1: 'Positive'})
     sentiment_counts = filtered_df_by_year['Text_Sentiment'].value_counts().reset_index()
     sentiment_counts["Text_Sentiment"] = sentiment_counts["Text_Sentiment"].replace({
         0 : "Negative",
         1 : "Positive"
     })
-    # wedges, texts, autotexts = ax.pie(counts, labels=None, autopct='%1.1f%%', startangle=90)
-    # ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-    # ax.legend(wedges, counts.index, title='Sentiment', loc='center left', bbox_to_anchor=(1, 0.5), )
-    # plt.setp(autotexts, size=8, weight="bold")  # Adjust the size and weight of percentage labels
-    # st.pyplot(fig)
 
     if not sentiment_counts.empty:
         fig2 = px.pie(sentiment_counts, values = "count", names = sentiment_counts["Text_Sentiment"],
@@ -148,8 +118,6 @@ if selected_label == "Customer Sentiment Analysis":
                     color=sentiment_counts["Text_Sentiment"],
                     color_discrete_sequence=["sky blue", "crimson"])
         st.plotly_chart(fig2)
-    # else:
-    #     st.markdown("<h2 style='text-align: center;'>No data available for the selected period.</h2>", unsafe_allow_html=True)
 
 else: #selected_label = "Topic Modelling"
     st.title('🏂 Topic Modelling')
@@ -172,8 +140,12 @@ else: #selected_label = "Topic Modelling"
 
     st.markdown("<h1 style='text-align: center;'>Topics for Positive Reviews</h1>", unsafe_allow_html=True)
     if not positive_df.empty:
-        positive_html_string = topic_modelling(positive_df)
+        positive_html_string, tokens = topic_modelling(positive_df)
         components.v1.html(positive_html_string, width=1200, height=800, scrolling=True)
+        positive_tokens_df = pd.DataFrame(columns=["Topic", "Most Relevant Words"])
+        for topic in tokens:
+            positive_tokens_df.loc[len(positive_tokens_df.index)] = [topic, list(filter(lambda token: token != "", tokens[topic].split(" ")))]
+        st.dataframe(positive_tokens_df, width=1200, hide_index=True)
     else:
         st.markdown("<h2 style='text-align: center;'>No data available for the selected period.</h2>", unsafe_allow_html=True)
 
@@ -185,10 +157,11 @@ else: #selected_label = "Topic Modelling"
 
     st.markdown("<h1 style='text-align: center;'>Topics for Negative Reviews</h1>", unsafe_allow_html=True)
     if not negative_df.empty:
-        negative_html_string = topic_modelling(negative_df)
+        negative_html_string, tokens = topic_modelling(negative_df)
         components.v1.html(negative_html_string, width=1200, height=800, scrolling=True)
+        negative_tokens_df = pd.DataFrame(columns=["Topic", "Most Relevant Words"])
+        for topic in tokens:
+            negative_tokens_df.loc[len(negative_tokens_df.index)] = [topic, list(filter(lambda token: token != "", tokens[topic].split(" ")))]
+        st.dataframe(negative_tokens_df, width=1200, hide_index=True)
     else:
         st.markdown("<h2 style='text-align: center;'>No data available for the selected period.</h2>", unsafe_allow_html=True)
-
-        # else:
-        # st.markdown("<h2 style='text-align: center;'>No data available for the selected period.</h2>", unsafe_allow_html=True)
