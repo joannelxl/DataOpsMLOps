@@ -142,8 +142,6 @@ if selected_label == "Customer Sentiment Analysis":
     neg_counts = neg_df["StayDate"].value_counts().reset_index()
     neg_counts = neg_counts.sort_values("StayDate", ascending=True).reset_index()
 
-    st.write(pos_df)
-
     if not pos_counts.empty and not neg_counts.empty:
         fig4 = go.Figure(data=go.Scatter(
             x=pos_counts["StayDate"], y= pos_counts["count"], name="Positive Counts"

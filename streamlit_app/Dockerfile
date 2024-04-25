@@ -1,8 +1,7 @@
 FROM python:3.11
 
-WORKDIR /app
+WORKDIR /streamlit_app
 
-COPY . /app
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -11,9 +10,9 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -r requirements.txt
+COPY . .
 
-RUN git clone https://github.com/e0727131/BT4301_GP09/streamlit_app .
+RUN pip install -r requirements.txt
 
 EXPOSE 8501
 
