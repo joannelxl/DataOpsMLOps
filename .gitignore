@@ -15,7 +15,7 @@ venv.bak/
 
 # DB info
 *.yml
-.streamlit
+.toml
 
 #
 Test.csv
