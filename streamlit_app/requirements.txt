@@ -1,0 +1,14 @@
+streamlit
+mysql-connector-python
+pandas
+sqlalchemy
+gensim
+nltk
+scikit-learn
+pyyaml
+textblob
+pyLDAvis
+pymysql
+plotly
+scipy==1.12.0
+

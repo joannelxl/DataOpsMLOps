@@ -1,9 +1,7 @@
 import streamlit as st
 import pandas as pd
-import altair as alt
 import sqlalchemy
 import plotly.express as px
-import matplotlib.pyplot as plt
 import mysql.connector
 from sqlalchemy import create_engine
 import yaml
@@ -20,6 +18,7 @@ from datetime import datetime
 import pyLDAvis
 import pyLDAvis.gensim_models
 import re
+import plotly.graph_objects as go
 
 # Set basic configurations for the Streamlit page
 st.set_page_config(
@@ -118,6 +117,40 @@ if selected_label == "Customer Sentiment Analysis":
                     color=sentiment_counts["Text_Sentiment"],
                     color_discrete_sequence=["sky blue", "crimson"])
         st.plotly_chart(fig2)
+    
+    month_counts = filtered_df_by_year["StayDate"].value_counts().reset_index()
+    month_counts = month_counts.sort_values("StayDate", ascending=True).reset_index()
+   
+    month_counts["cumulative"] = month_counts["count"].cumsum()
+    if not month_counts.empty:
+        df = month_counts
+        fig3 = go.Figure(data=go.Scatter(
+            x=df["StayDate"], y= df["count"], name="Monthly"
+        ))
+        fig3.add_scatter(x=df["StayDate"], y=df["cumulative"], name="Cumulative")
+        fig3.update_layout(title="Reviews Monthly and Cumulative",
+                        xaxis_title="Date", yaxis_title="Count")
+        st.plotly_chart(fig3)
+
+    pos_df = filtered_df_by_year[filtered_df_by_year["Text_Sentiment"] == 1]
+    
+    neg_df = filtered_df_by_year[filtered_df_by_year["Text_Sentiment"] == 0]
+    
+
+    pos_counts = pos_df["StayDate"].value_counts().reset_index()
+    pos_counts = pos_counts.sort_values("StayDate", ascending=True).reset_index()
+    neg_counts = neg_df["StayDate"].value_counts().reset_index()
+    neg_counts = neg_counts.sort_values("StayDate", ascending=True).reset_index()
+
+    if not pos_counts.empty and not neg_counts.empty:
+        fig4 = go.Figure(data=go.Scatter(
+            x=pos_counts["StayDate"], y= pos_counts["count"], name="Positive Counts"
+        ))
+        fig4.add_scatter(x=neg_counts["StayDate"], y=neg_counts["count"], name="Negative Countss")
+        fig4.update_layout(title="Reviews Positive and Negative Counts",
+                        xaxis_title="Date", yaxis_title="Count")
+        st.plotly_chart(fig4)
+        
 
 else: #selected_label = "Topic Modelling"
     st.title('🏂 Topic Modelling')
