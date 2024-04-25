@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/35c654d8f541486b8a41328a26343c82/artifacts
+end_time: 1714027918034
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: 35c654d8f541486b8a41328a26343c82
+run_name: able-grub-801
+run_uuid: 35c654d8f541486b8a41328a26343c82
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714027917894
+status: 4
+tags: []
+user_id: joelleng

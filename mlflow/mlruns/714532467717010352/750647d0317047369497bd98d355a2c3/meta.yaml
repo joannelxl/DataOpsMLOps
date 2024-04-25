@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/750647d0317047369497bd98d355a2c3/artifacts
+end_time: 1714029170539
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: 750647d0317047369497bd98d355a2c3
+run_name: nimble-vole-33
+run_uuid: 750647d0317047369497bd98d355a2c3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714028801337
+status: 4
+tags: []
+user_id: joelleng

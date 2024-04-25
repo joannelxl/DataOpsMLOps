@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/bfed4a0cc5884ac8a4fa358242e8f1fe/artifacts
+end_time: 1714028321104
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: bfed4a0cc5884ac8a4fa358242e8f1fe
+run_name: bemused-elk-530
+run_uuid: bfed4a0cc5884ac8a4fa358242e8f1fe
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714027967684
+status: 4
+tags: []
+user_id: joelleng

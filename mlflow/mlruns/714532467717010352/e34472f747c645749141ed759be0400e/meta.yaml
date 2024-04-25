@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/e34472f747c645749141ed759be0400e/artifacts
+end_time: 1714032372750
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: e34472f747c645749141ed759be0400e
+run_name: aged-finch-991
+run_uuid: e34472f747c645749141ed759be0400e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714031623523
+status: 3
+tags: []
+user_id: joelleng

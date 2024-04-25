@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/9c9ee0b0017d461ba04f967684fd08d2/artifacts
+end_time: 1714031605586
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: 9c9ee0b0017d461ba04f967684fd08d2
+run_name: big-crow-469
+run_uuid: 9c9ee0b0017d461ba04f967684fd08d2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714031050787
+status: 4
+tags: []
+user_id: joelleng
