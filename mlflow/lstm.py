@@ -209,8 +209,8 @@ batch_size = 64
 
 # DataLoader
 train_loader = DataLoader(train_data, shuffle=True, batch_size=64, drop_last=True)
-test_loader = DataLoader(test_data, shuffle=True, batch_size=64, drop_last=True)
-val_loader = DataLoader(val_data, shuffle=True, batch_size=64, drop_last=True)
+test_loader = DataLoader(test_data, shuffle=False, batch_size=64, drop_last=True)
+val_loader = DataLoader(val_data, shuffle=False, batch_size=64, drop_last=True)
 
 # LSTM class
 class SentimentRNN(nn.Module):
@@ -242,7 +242,6 @@ class SentimentRNN(nn.Module):
         # embeddings and lstm_out
 
         embeds = self.embedding(x)  # shape: B x S x Feature   since batch = True
-        #print(embeds.shape)  #[50, 500, 64]; 64 is the embedding_dim defined below.
         
         lstm_out, hidden = self.lstm(embeds, hidden)
 
@@ -260,7 +259,7 @@ class SentimentRNN(nn.Module):
         # reshape to be batch_size first
         sig_out = sig_out.view(batch_size, -1)
 
-        sig_out = sig_out[:, -1] # get last batch of labels, this is very important for an output of a sentiment score!!!
+        sig_out = sig_out[:, -1]
 
         # return last sigmoid output and hidden state
         return sig_out, hidden
