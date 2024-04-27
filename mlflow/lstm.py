@@ -290,7 +290,7 @@ def acc(pred,label):
 
 # set the gradient clipping threshold and number of training epochs
 clip = 5
-epochs = 2
+epochs = 5
 
 def train(dataloader, model, loss_fn, metrics_fn, optimizer, epoch, device):
     model.train()
@@ -382,7 +382,7 @@ with mlflow.start_run() as run:
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_loader, model, loss_fn, metric_fn, optimizer, epoch=t, device=device)
-        evaluate(test_loader, model, loss_fn, metric_fn, epoch=0, device=device)
+        evaluate(test_loader, model, loss_fn, metric_fn, epoch=t, device=device)
 
     # Save the trained model to MLflow.
     mlflow.pytorch.log_model(pytorch_model=model, 

@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/bdd0ac43097c43738ef8fe0bb3e0119f/artifacts
+end_time: 1714152224818
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: bdd0ac43097c43738ef8fe0bb3e0119f
+run_name: able-elk-50
+run_uuid: bdd0ac43097c43738ef8fe0bb3e0119f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714146398314
+status: 3
+tags: []
+user_id: joelleng
