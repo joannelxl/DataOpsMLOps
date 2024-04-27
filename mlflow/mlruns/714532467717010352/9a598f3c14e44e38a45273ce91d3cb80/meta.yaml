@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/9a598f3c14e44e38a45273ce91d3cb80/artifacts
+end_time: 1714189956289
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: 9a598f3c14e44e38a45273ce91d3cb80
+run_name: rebellious-snail-947
+run_uuid: 9a598f3c14e44e38a45273ce91d3cb80
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714185591063
+status: 3
+tags: []
+user_id: joelleng

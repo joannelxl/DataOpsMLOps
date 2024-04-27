@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/3b97807840ea4000b57654ee0eee5e58/artifacts
+end_time: 1714145958969
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: 3b97807840ea4000b57654ee0eee5e58
+run_name: traveling-duck-844
+run_uuid: 3b97807840ea4000b57654ee0eee5e58
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714144766839
+status: 3
+tags: []
+user_id: joelleng

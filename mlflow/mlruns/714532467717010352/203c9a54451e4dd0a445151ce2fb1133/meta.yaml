@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/203c9a54451e4dd0a445151ce2fb1133/artifacts
+end_time: 1714184053336
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: 203c9a54451e4dd0a445151ce2fb1133
+run_name: upbeat-cub-922
+run_uuid: 203c9a54451e4dd0a445151ce2fb1133
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714153362424
+status: 3
+tags: []
+user_id: joelleng
