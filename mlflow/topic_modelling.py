@@ -14,6 +14,7 @@ import nltk
 from textblob import TextBlob
 from sklearn.metrics import accuracy_score
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk import pos_tag
 import mlflow
 from mlflow.models import infer_signature
 import mlflow.pyfunc
@@ -52,19 +53,12 @@ df = pd.read_sql(sql=review_sql, con=db_datawarehouse)
 dwh.close()
 
 def preprocess_text(text):
-    text = str(text).lower()
-    text = re.sub(r'\W', ' ', text)
-    text = re.sub(r'\s+', ' ', text)
-    text = re.sub(r'[0-9]', '', text)
-    text = re.sub(r'\W*\b(?!no)\w{1,2}\b', '', text)
-    stop_words = set(stopwords.words('english'))
-    lemmatizer = WordNetLemmatizer()
-    words = text.split()
-    words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
-    
-    return words
+    is_noun = lambda pos: pos[:2] == 'NN'
+    text = text.split()
+    nouns = [word for (word, pos) in pos_tag(text) if is_noun(pos)]
+    return nouns
 
-df['ProcessedText'] = df['ReviewText'].apply(preprocess_text)
+df['ProcessedText'] = df['CleanReviewText'].apply(preprocess_text)
 texts = df["ProcessedText"].to_numpy()
 dictionary = Dictionary(texts)
 corpus = [dictionary.doc2bow(text) for text in texts]

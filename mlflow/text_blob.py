@@ -68,7 +68,7 @@ model_path = "text_blob"
 model = TextB()
 y_pred = model.predict(reviews)
 y_pred = [0 if pred<=0 else 1 for pred in y_pred]
-y_truth = [0 if pred<=0 else 1 for pred in df["TextBlob_Review"]]
+y_truth = [0 if pred<=0 else 1 for pred in df["WeightedTextScore"]]
 accuracy = accuracy_score(y_truth, y_pred)
 
 # Define the signature associated with the model
