@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/3059d38467684066afa953ee427b177f/artifacts
+end_time: 1714212026712
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: 3059d38467684066afa953ee427b177f
+run_name: sincere-fowl-445
+run_uuid: 3059d38467684066afa953ee427b177f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714212025564
+status: 4
+tags: []
+user_id: joelleng

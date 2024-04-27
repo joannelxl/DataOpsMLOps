@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/714532467717010352/9e9b6a8e25344af5adfbb34eec455e80/artifacts
+end_time: 1714212156798
+entry_point_name: ''
+experiment_id: '714532467717010352'
+lifecycle_stage: active
+run_id: 9e9b6a8e25344af5adfbb34eec455e80
+run_name: nebulous-fawn-802
+run_uuid: 9e9b6a8e25344af5adfbb34eec455e80
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1714212152694
+status: 4
+tags: []
+user_id: joelleng
