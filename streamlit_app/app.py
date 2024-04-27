@@ -45,7 +45,7 @@ def preprocess_data(df, column):
     return df
 
 @st.cache_data
-def topic_modelling(df):
+def topic_modelling(df ,num_segments, top_tokens):
     #Apply topic modelling package
     texts = df["ProcessedText"].to_numpy()
     dictionary = Dictionary(texts)
@@ -53,7 +53,7 @@ def topic_modelling(df):
 
     lda_model = LdaModel(corpus=corpus,
                     id2word=dictionary,
-                    num_topics=5,
+                    num_topics=num_segments,
                     random_state=42,
                     update_every=1,
                     chunksize=100,
@@ -62,8 +62,7 @@ def topic_modelling(df):
                     per_word_topics=True)
     
     # Code referenced from https://stackoverflow.com/questions/46536132/how-to-access-topic-words-only-in-gensim
-    print(lda_model.show_topics())
-    lda_topics = lda_model.show_topics()
+    lda_topics = lda_model.show_topics(num_words=top_tokens)
     words = {}
     for topic, word in lda_topics:
         words[topic] = re.sub('[^A-Za-z ]+', '', word)
@@ -73,11 +72,7 @@ def topic_modelling(df):
     # Get topic mapping
     updated_mapping = {}
     for i in vis.topic_coordinates.topics.index:
-        print(i)
-        print(i%5)
-        print(words[i])
         updated_mapping[vis.topic_coordinates.topics[i]] = words[i]
-    print(updated_mapping)
     html_string = pyLDAvis.prepared_data_to_html(vis)
     return (html_string, updated_mapping)
 
@@ -147,6 +142,7 @@ if selected_label == "Customer Sentiment Analysis":
             x=pos_counts["StayDate"], y= pos_counts["count"], name="Positive Counts"
         ))
         fig4.add_scatter(x=neg_counts["StayDate"], y=neg_counts["count"], name="Negative Counts")
+        fig4.data[1].line.color = "#FF0000" # Red line for negative reviews
         fig4.update_layout(title="Reviews Positive and Negative Counts",
                         xaxis_title="Date", yaxis_title="Count")
         st.plotly_chart(fig4)
@@ -159,6 +155,17 @@ else: #selected_label = "Topic Modelling"
     min_date = df['StayDate'].min()
     max_date = df['StayDate'].max()
     date_range = st.date_input("Pick the period you want to analyse", (min_date, max_date),  max_value = max_date, min_value = min_date, format="DD/MM/YYYY", key="topics")
+
+    # Split the view into 2 halves of equal width
+    left, _, right = st.columns([0.4, 0.2, 0.4])
+    with left:
+        # slider to choose the number of segments to split the customers into
+        selected_num_of_groups = st.slider("Number of customer segments",
+                                           min_value=1, max_value=10, value=5)
+    with right:
+        # slider to choose the top relevant words associated to each customer segment
+        selected_top_k_tokens_for_each_segment = st.slider("Number of most relevant words for each customer segment",
+                                                           min_value=1, max_value=10, value=10)
     
     # filter by range of dates
     earliest_date = pd.to_datetime(date_range[0])
@@ -171,11 +178,11 @@ else: #selected_label = "Topic Modelling"
     #Positive Reviews Topic Modelling
     positive_df = df[df["Text_Sentiment"] == 1]
 
-    st.markdown("<h1 style='text-align: center;'>Topics for Positive Reviews</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Positive Reviews</h1>", unsafe_allow_html=True)
     if not positive_df.empty:
-        positive_html_string, tokens = topic_modelling(positive_df)
-        components.v1.html(positive_html_string, width=1200, height=800, scrolling=True)
-        positive_tokens_df = pd.DataFrame(columns=["Topic", "Most Relevant Words"])
+        positive_html_string, tokens = topic_modelling(positive_df, selected_num_of_groups, selected_top_k_tokens_for_each_segment)
+        # components.v1.html(positive_html_string, width=1200, height=800, scrolling=True)
+        positive_tokens_df = pd.DataFrame(columns=["Customer Segment", "Most Relevant Words"])
         for topic in tokens:
             positive_tokens_df.loc[len(positive_tokens_df.index)] = [topic, list(filter(lambda token: token != "", tokens[topic].split(" ")))]
         st.dataframe(positive_tokens_df, width=1200, hide_index=True)
@@ -188,11 +195,11 @@ else: #selected_label = "Topic Modelling"
     #Negative Reviews Topic Modelling
     negative_df = df[df["Text_Sentiment"] == 0]
 
-    st.markdown("<h1 style='text-align: center;'>Topics for Negative Reviews</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Negative Reviews</h1>", unsafe_allow_html=True)
     if not negative_df.empty:
-        negative_html_string, tokens = topic_modelling(negative_df)
-        components.v1.html(negative_html_string, width=1200, height=800, scrolling=True)
-        negative_tokens_df = pd.DataFrame(columns=["Topic", "Most Relevant Words"])
+        negative_html_string, tokens = topic_modelling(negative_df, selected_num_of_groups, selected_top_k_tokens_for_each_segment)
+        # components.v1.html(negative_html_string, width=1200, height=800, scrolling=True)
+        negative_tokens_df = pd.DataFrame(columns=["Customer Segment", "Most Relevant Words"])
         for topic in tokens:
             negative_tokens_df.loc[len(negative_tokens_df.index)] = [topic, list(filter(lambda token: token != "", tokens[topic].split(" ")))]
         st.dataframe(negative_tokens_df, width=1200, hide_index=True)
