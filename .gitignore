@@ -15,6 +15,7 @@ venv.bak/
 
 # DB info
 *.yml
+**/*.yml
 .toml
 
 #
