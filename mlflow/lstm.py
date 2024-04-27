@@ -79,14 +79,16 @@ else:
 
 # Reading the data
 df = pd.read_sql_table('review', db_datawarehouse).copy()
-df = df.drop(columns=['index'])
-
+df2 = pd.read_sql_table('fact', db_datawarehouse).copy()
+df, df2 = df.drop(columns=['index']), df2.drop(columns=['index'])
+final_df = pd.merge(df, df2, on='ReviewID', how='inner')
+print(final_df.columns.tolist())
 # Split into train, test, val set
-data = df[['ReviewText', 'DateOfStay', 'Text_Sentiment']]
+data = final_df[['CleanReviewText', 'DateOfStay', 'Text_Sentiment']]
 train_data = data[data['DateOfStay'].apply(lambda x: int(x.split('-')[0])) < 2022]
 test_data = data[data['DateOfStay'].apply(lambda x: int(x.split('-')[0])) >= 2022]
-X_trainset, y_trainset = train_data['ReviewText'].values, train_data['Text_Sentiment'].values
-X_test_val, y_test_val = test_data['ReviewText'].values, test_data['Text_Sentiment'].values
+X_trainset, y_trainset = train_data['CleanReviewText'].values, train_data['Text_Sentiment'].values
+X_test_val, y_test_val = test_data['CleanReviewText'].values, test_data['Text_Sentiment'].values
 X_testset, X_valset, y_testset, y_valset = train_test_split(X_test_val, y_test_val, test_size=0.5)
 
 print(f'Shape of train data is {X_trainset.shape} and {y_trainset.shape}')
@@ -193,6 +195,7 @@ X_val_pad = padding_(X_val, 500)
 # Random oversampling to address class imbalance
 ros = RandomOverSampler(random_state=42)
 X_train_res, y_train_res = ros.fit_resample(X_train_pad, y_train)
+print(f'Shape of train data is {X_train_res.shape} and {y_train_res.shape}')
 
 # TensorDataset
 train_data = TensorDataset(torch.from_numpy(X_train_res), torch.from_numpy(y_train_res))
@@ -359,6 +362,23 @@ def evaluate(dataloader, model, loss_fn, metrics_fn, epoch, device):
 mlflow.set_tracking_uri(uri="http://localhost:9080")
 mlflow.set_experiment("MLFlow for Project - LSTM")
 
+
+# Sample input from train_loader
+sample_inputs, _ = next(iter(train_loader))
+
+# Init hidden
+h = model.init_hidden(batch_size)
+
+# Get sample output
+sample_outputs, h = model(sample_inputs, h)
+
+# To numpy
+sample_inputs_np = sample_inputs.numpy()
+sample_outputs_np = sample_outputs.detach().numpy()
+
+# Infer the signature 
+signature = infer_signature(sample_inputs_np, sample_outputs_np)
+
 with mlflow.start_run() as run:
     mlflow.set_tag("Model", "LSTM")
     params = {
@@ -383,11 +403,9 @@ with mlflow.start_run() as run:
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_loader, model, loss_fn, metric_fn, optimizer, epoch=t, device=device)
         evaluate(test_loader, model, loss_fn, metric_fn, epoch=t, device=device)
-
+    
     # Save the trained model to MLflow.
-    mlflow.pytorch.log_model(pytorch_model=model, 
-                             artifact_path="LSTM",
-                             pip_requirements=None)
+    mlflow.pytorch.log_model(model, "LSTM", signature=signature)
 
 # Inference after loading the logged model
 model_uri = f"runs:/{run.info.run_id}/LSTM"
