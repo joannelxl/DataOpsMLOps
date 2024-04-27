@@ -183,7 +183,7 @@ def etl_review_dimension(**kwargs):
 
     # add to review dimension 
     review_sql = f"""
-    SELECT *
+    SELECT ReviewTitle, ReviewText, AuthorContribution, Rating, OverallID
     FROM tripadvisor_reviews
     WHERE OverallID > {count}
     """
