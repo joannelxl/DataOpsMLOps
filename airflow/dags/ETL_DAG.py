@@ -201,9 +201,7 @@ def etl_review_dimension(**kwargs):
     review_df['CleanReviewText'] = review_df['ReviewText'].apply(process_text)
     review_df['WeightedTitleScore'] = review_df.apply(weighed_title_score, axis = 1)
     review_df['WeightedTextScore'] = review_df.apply(weighed_text_score, axis = 1)
-    review_df["Text_Sentiment"] = review_df['WeightedTextScore'].apply(threshold)
-    review_df["Title_Sentiment"] = review_df['WeightedTitleScore'].apply(threshold)
-
+    review_df.drop(['ReviewTitle', 'ReviewText'], axis=1, inplace=True)
     logging.info(review_df)
 
     review_df.to_sql(name='review', con = db_datawarehouse, if_exists='append')
@@ -295,12 +293,15 @@ def etl_fact(**kwargs):
 
     # Load Fact Table in dwh
     fact_sql = f'''
-    SELECT review.OverallID, review.ReviewID, time.TimeID, review.Title_Sentiment, review.Text_Sentiment
+    SELECT review.OverallID, review.ReviewID, time.TimeID, review.WeightedTextScore, review.WeightedTitleScore
     FROM review
     INNER JOIN time ON review.OverallID = time.OverallID
     WHERE review.OverallID > {count}
     '''
     fact_df = pd.read_sql(sql = fact_sql, con=db_datawarehouse)
+    fact_df["Text_Sentiment"] = fact_df['WeightedTextScore'].apply(threshold)
+    fact_df["Title_Sentiment"] = fact_df['WeightedTitleScore'].apply(threshold)
+    fact_df.drop(['WeightedTextScore', 'WeightedTitleScore'], axis=1, inplace=True)
     fact_df.to_sql(name='fact', con=db_datawarehouse, if_exists='append')
     db_datawarehouse.commit()
     db_datawarehouse.close()
