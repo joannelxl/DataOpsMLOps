@@ -146,7 +146,7 @@ if selected_label == "Customer Sentiment Analysis":
         fig4 = go.Figure(data=go.Scatter(
             x=pos_counts["StayDate"], y= pos_counts["count"], name="Positive Counts"
         ))
-        fig4.add_scatter(x=neg_counts["StayDate"], y=neg_counts["count"], name="Negative Countss")
+        fig4.add_scatter(x=neg_counts["StayDate"], y=neg_counts["count"], name="Negative Counts")
         fig4.update_layout(title="Reviews Positive and Negative Counts",
                         xaxis_title="Date", yaxis_title="Count")
         st.plotly_chart(fig4)
