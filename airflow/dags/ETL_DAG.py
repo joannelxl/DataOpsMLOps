@@ -346,8 +346,8 @@ with DAG(
     },
     description='ETL into data warehouse',
 
-    # This particular DAG will run monthly on the 2nd day of the month at 10am.
-    schedule_interval='* 10 2 * *',
+    # This particular DAG will run monthly on the 2nd day of the month at midnight.
+    schedule_interval='0 0 2 * *',
 
     start_date=datetime(2024, 2, 28),
     dagrun_timeout=timedelta(minutes=30),
