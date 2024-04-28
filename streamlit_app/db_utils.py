@@ -46,7 +46,7 @@ def get_data():
 
         join_sql = '''
         SELECT  fact.Text_Sentiment, fact.Title_Sentiment, time.OverallID, time.StayDate, time.StayDateYear, time.StayDateMonth, time.StayDateDayOfWeek, time.StayDateDay, time.StayDateWeek,
-            review.ReviewID, review.CleanReviewTitle, review.CleanReviewText, review.DateOfStay, review.AuthorContribution, review.Rating, review.WeightedTitleScore, review.WeightedTextScore
+            review.ReviewID, review.CleanReviewTitle, review.CleanReviewText, review.AuthorContribution, review.Rating, review.WeightedTitleScore, review.WeightedTextScore
         FROM fact
         INNER JOIN review ON fact.OverallID = review.OverallID
         INNER JOIN time ON time.OverallID = fact.OverallID
