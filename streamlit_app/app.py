@@ -186,6 +186,10 @@ else: #selected_label = "Topic Modelling"
         for topic in tokens:
             positive_tokens_df.loc[len(positive_tokens_df.index)] = [topic, list(filter(lambda token: token != "", tokens[topic].split(" ")))]
         st.dataframe(positive_tokens_df, width=1200, hide_index=True)
+        token1_clean = re.sub(r'\s+', ', ', tokens[1])
+        st.write("The most relevant words associated with each customer segment tell us the areas where customers are satisfied with MBS hotel.")
+        st.write("For example, customers from customer segment 1 are satisfied with: ",token1_clean)
+
     else:
         st.markdown("<h2 style='text-align: center;'>No data available for the selected period.</h2>", unsafe_allow_html=True)
 
@@ -203,5 +207,8 @@ else: #selected_label = "Topic Modelling"
         for topic in tokens:
             negative_tokens_df.loc[len(negative_tokens_df.index)] = [topic, list(filter(lambda token: token != "", tokens[topic].split(" ")))]
         st.dataframe(negative_tokens_df, width=1200, hide_index=True)
+        token1_clean = re.sub(r'\s+', ', ', tokens[1])
+        st.write("The most relevant words associated with each customer segment tell us the areas where customers are NOT satisfied with MBS hotel.")
+        st.write("For example, customers from customer segment 1 are NOT satisfied with: ",token1_clean)
     else:
         st.markdown("<h2 style='text-align: center;'>No data available for the selected period.</h2>", unsafe_allow_html=True)
