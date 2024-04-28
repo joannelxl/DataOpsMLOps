@@ -161,7 +161,7 @@ else: #selected_label = "Topic Modelling"
     with left:
         # slider to choose the number of segments to split the customers into
         selected_num_of_groups = st.slider("Number of customer segments",
-                                           min_value=1, max_value=10, value=5)
+                                           min_value=2, max_value=10, value=5)
     with right:
         # slider to choose the top relevant words associated to each customer segment
         selected_top_k_tokens_for_each_segment = st.slider("Number of most relevant words for each customer segment",
