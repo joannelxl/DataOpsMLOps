@@ -24,13 +24,13 @@ with DAG(
         'email_on_failure': False,
         'email_on_retry': False,
         'retries': 1,
-        'retry_delay': timedelta(minutes=5),
+        'retry_delay': timedelta(minutes=30),
     },
     description='DAG to ingest tripadvisor data month by month',
-    schedule_interval=None,
+    schedule_interval= '@monthly', # Run once a month at midnight of the first day of the month	
 
     start_date=datetime(2024, 2, 28),
-    dagrun_timeout=timedelta(seconds=5),
+    dagrun_timeout=timedelta(minutes=30),
     catchup=False,
     tags = ["bt4301"]
 ) as dag:
